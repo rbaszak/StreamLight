@@ -2,7 +2,7 @@
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
 version=$(tr -cd '0-9.' < "$root/app/version.txt")
-revision=${PACKAGE_REVISION:-5}
+revision=${PACKAGE_REVISION:-1}
 [[ "$revision" =~ ^[0-9]+$ ]] || exit 1
 appdir=$(cat "$root/build/current-appdir.txt")
 test -x "$appdir/AppRun"

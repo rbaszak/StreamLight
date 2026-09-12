@@ -13,7 +13,7 @@ Repository: https://github.com/rbaszak/StreamLight. Preserve the upstream histor
 
 Fork Actions may initially need to be enabled in GitHub's Actions tab. Public standard GitHub-hosted runners can build the platforms concurrently; account settings and quotas still apply. No Mac, Apple developer account or Windows machine is required on the maintainer's desk for these CI builds. Apple notarization and Windows signing are not configured.
 
-After reviewing successful branch builds, create and push a version tag, e.g. `v5.7.0-r5`. The release job waits for **all** build jobs, adds SHA256SUMS, and publishes a prerelease. Do not reuse an existing release tag. Increment `pkgrel` in `packaging/arch/PKGBUILD`, `PACKAGE_REVISION` default in `scripts/build-deb.sh`, and the default revision in the workflow together; update `app/version.txt` when the upstream application version changes. Tag naming affects DMG/AppImage/Windows filenames; native package versions come from app/version.txt plus their package revision.
+After reviewing successful branch builds, create and push a version tag, e.g. `v5.7.1`. The release job waits for **all** build jobs, adds SHA256SUMS, and publishes a prerelease. Do not reuse an existing release tag. Increment `pkgrel` in `packaging/arch/PKGBUILD`, `PACKAGE_REVISION` default in `scripts/build-deb.sh` together; update `app/version.txt` when the upstream application version changes. Tag naming affects DMG/AppImage/Windows filenames; native package versions come from app/version.txt plus their package revision.
 
 Build outputs under `dist/` are ignored by Git. Artifacts remain available on successful individual jobs if another platform fails, but the release is not published until the whole matrix passes.
 

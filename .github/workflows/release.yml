@@ -20,7 +20,7 @@ jobs:
       - id: version
         shell: bash
         run: |
-          version="$(tr -cd '0-9.' < app/version.txt)-r5"
+          version="$(tr -cd '0-9.' < app/version.txt)"
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then version="${GITHUB_REF_NAME#v}"; fi
           [[ "$version" =~ ^[0-9][A-Za-z0-9._-]*$ ]] || exit 1
           echo "version=$version" >> "$GITHUB_OUTPUT"

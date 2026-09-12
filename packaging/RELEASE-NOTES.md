@@ -5,3 +5,5 @@ Choose `.pkg.tar.zst` for current CachyOS/Arch; `.deb` for Ubuntu 22.04+/Mint 21
 macOS builds are ad-hoc signed and not notarized; Windows packages are unsigned. See the repository README and BUILDING.md for installation, limitations and source/build instructions. SHA256SUMS covers all attached packages.
 
 The client includes default-host startup and soft configurable menu sounds. StreamTweak remains a Windows-only host.
+
+Optional Steam library artwork is available in the [steamgriddb folder](https://github.com/rbaszak/StreamLight/tree/main/steamgriddb). It is not required to install or run the client.

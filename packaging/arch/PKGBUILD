@@ -1,6 +1,6 @@
 pkgname=streamlight
-pkgver=5.7.0
-pkgrel=5
+pkgver=5.7.1
+pkgrel=1
 pkgdesc='StreamLight game streaming client - experimental Linux port'
 arch=('x86_64')
 url='https://github.com/rbaszak/StreamLight'
