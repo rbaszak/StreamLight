@@ -1,4 +1,5 @@
 import Theme 1.0
+import MenuSettings 1.0
 import QtQuick 2.15
 import QtQuick.Controls 2.2
 import QtQuick.Controls.Material 2.2
@@ -1342,7 +1343,7 @@ FocusScope {
                             id: fracVsyncRow
                             width: parent.width
                             height: Math.max(settingsScreen._rowHeightTall, fracVsyncCol.implicitHeight + settingsScreen._px(16))
-                            enabled: StreamingPreferences.enableVsync
+                            enabled: Qt.platform.os === "windows" && StreamingPreferences.enableVsync
                                      && StreamingPreferences.framePacingMode !== StreamingPreferences.FP_OFF
                             opacity: enabled ? 1.0 : 0.4
 
@@ -1365,7 +1366,9 @@ FocusScope {
                                 Label {
                                     width: parent.width
                                     wrapMode: Text.WordWrap
-                                    text: fracVsyncRow.enabled
+                                    text: Qt.platform.os !== "windows"
+                                          ? qsTr("Available only on Windows with the D3D11 renderer.")
+                                          : fracVsyncRow.enabled
                                           // ⚠️ The condition is the ratio between the two, not the
                                           // screen on its own. Said as "144 Hz does not work" it
                                           // reads as a blacklist of panels, and @Soladus pointed
@@ -2373,7 +2376,9 @@ FocusScope {
                                     color: settingsScreen._text
                                 }
                                 Label {
-                                    text: qsTr("Launches Tailscale in the background so remote hosts can be reached via Tailscale IP.")
+                                    text: Qt.platform.os === "windows"
+                                          ? qsTr("Launches Tailscale in the background so remote hosts can be reached via Tailscale IP.")
+                                          : qsTr("Start Tailscale using your system service, then add the host's Tailscale IP manually.")
                                     font.family: Theme.family
                                     font.pixelSize: settingsScreen._px(Theme.fontSmall)
                                     color: settingsScreen._textDim
@@ -2382,6 +2387,8 @@ FocusScope {
 
                             OnOffSelector {
                                 id: tailscaleSwitch
+                                enabled: Qt.platform.os === "windows"
+                                opacity: enabled ? 1.0 : 0.4
                                 anchors.right: parent.right
                                 anchors.rightMargin: settingsScreen._px(16)
                                 anchors.verticalCenter: parent.verticalCenter
@@ -2436,7 +2443,7 @@ FocusScope {
                         Item {
                             width: parent.width
                             height: settingsScreen._rowHeight + settingsScreen._px(18)
-                            enabled: !settingsScreen._lockMatchLink && !settingsScreen._stOff
+                            enabled: Qt.platform.os === "windows" && !settingsScreen._lockMatchLink && !settingsScreen._stOff
                             opacity: enabled ? 1.0 : 0.4
 
                             Column {
@@ -2455,7 +2462,9 @@ FocusScope {
                                     color: settingsScreen._text
                                 }
                                 Label {
-                                    text: qsTr("Before connecting, ask the host to run its wired link at this device's speed. Fixes the packet loss caused by a faster host link feeding a slower one.")
+                                    text: Qt.platform.os === "windows"
+                                          ? qsTr("Before connecting, ask the host to run its wired link at this device's speed. Fixes the packet loss caused by a faster host link feeding a slower one.")
+                                          : qsTr("Available only on Windows: this client cannot measure the local wired link speed.")
                                     font.family: Theme.family
                                     font.pixelSize: settingsScreen._px(Theme.fontSmall)
                                     color: settingsScreen._textDim
@@ -2755,6 +2764,94 @@ FocusScope {
                         // ── GUI mode (dropdown) ───────────────────────────────
                         Item {
                             width: parent.width
+                            height: settingsScreen._rowHeightTall
+                            Column {
+                                anchors.left: parent.left
+                                anchors.leftMargin: settingsScreen._px(16)
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: settingsScreen._px(3)
+                                Label {
+                                    text: qsTr("Menu sounds")
+                                    font.family: Theme.family
+                                    font.pixelSize: settingsScreen._px(Theme.fontBody)
+                                    font.bold: true
+                                    color: settingsScreen._text
+                                }
+                                Label {
+                                    text: qsTr("Soft navigation and confirmation sounds. Silent during streaming.")
+                                    font.family: Theme.family
+                                    font.pixelSize: settingsScreen._px(Theme.fontSmall)
+                                    color: settingsScreen._textDim
+                                }
+                            }
+                            OnOffSelector {
+                                anchors.right: parent.right
+                                anchors.rightMargin: settingsScreen._px(16)
+                                anchors.verticalCenter: parent.verticalCenter
+                                checked: MenuSettings.soundsEnabled
+                                onToggled: function(v) { MenuSettings.soundsEnabled = v; MenuSettings.preview() }
+                            }
+                        }
+                        Item {
+                            width: parent.width
+                            height: settingsScreen._rowHeight
+                            enabled: MenuSettings.soundsEnabled
+                            opacity: enabled ? 1 : 0.4
+                            Label {
+                                text: qsTr("Menu sound volume")
+                                anchors.left: parent.left
+                                anchors.leftMargin: settingsScreen._px(16)
+                                anchors.verticalCenter: parent.verticalCenter
+                                font.family: Theme.family
+                                font.pixelSize: settingsScreen._px(Theme.fontBody)
+                                font.bold: true
+                                color: settingsScreen._text
+                            }
+                            SegmentedSelector {
+                                anchors.right: parent.right
+                                anchors.rightMargin: settingsScreen._px(16)
+                                anchors.verticalCenter: parent.verticalCenter
+                                labels: ["10%", "25%", "50%", "75%", "100%"]
+                                property var levels: [10, 25, 50, 75, 100]
+                                Binding on currentIndex { value: [10, 25, 50, 75, 100].indexOf(MenuSettings.soundVolume) }
+                                onActivated: function(i) { MenuSettings.soundVolume = levels[i]; MenuSettings.preview() }
+                            }
+                        }
+                        Item {
+                            width: parent.width
+                            height: settingsScreen._rowHeightTall
+                            Column {
+                                anchors.left: parent.left
+                                anchors.leftMargin: settingsScreen._px(16)
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: settingsScreen._px(3)
+                                Label {
+                                    text: qsTr("Default host at startup")
+                                    font.family: Theme.family
+                                    font.pixelSize: settingsScreen._px(Theme.fontBody)
+                                    font.bold: true
+                                    color: settingsScreen._text
+                                }
+                                Label {
+                                    text: MenuSettings.defaultHost.length > 0
+                                          ? qsTr("Opens the selected host's library when online.")
+                                          : qsTr("Choose Set as default host in a host's Options menu.")
+                                    font.family: Theme.family
+                                    font.pixelSize: settingsScreen._px(Theme.fontSmall)
+                                    color: settingsScreen._textDim
+                                }
+                            }
+                            PillButton {
+                                text: qsTr("Clear")
+                                visible: MenuSettings.defaultHost.length > 0
+                                anchors.right: parent.right
+                                anchors.rightMargin: settingsScreen._px(16)
+                                anchors.verticalCenter: parent.verticalCenter
+                                onClicked: MenuSettings.defaultHost = ""
+                            }
+                        }
+                        Item {
+                            width: parent.width
                             height: settingsScreen._rowHeight
 
                             Label {
@@ -2880,7 +2977,9 @@ FocusScope {
                                     color: settingsScreen._text
                                 }
                                 Label {
-                                    text: qsTr("Shows the streamed game in your Discord status")
+                                    text: SystemProperties.hasDiscordIntegration
+                                          ? qsTr("Shows the streamed game in your Discord status")
+                                          : qsTr("Discord integration is not included in this build.")
                                     font.family: Theme.family
                                     font.pixelSize: settingsScreen._px(Theme.fontSmall)
                                     color: settingsScreen._textDim
@@ -2889,6 +2988,8 @@ FocusScope {
 
                             OnOffSelector {
                                 id: discordSwitch
+                                enabled: SystemProperties.hasDiscordIntegration
+                                opacity: enabled ? 1.0 : 0.4
                                 anchors.right: parent.right
                                 anchors.rightMargin: settingsScreen._px(16)
                                 anchors.verticalCenter: parent.verticalCenter
@@ -2939,7 +3040,7 @@ FocusScope {
                         Item {
                             width: parent.width
                             height: settingsScreen._rowHeightTall
-                            enabled: !settingsScreen._lockHue
+                            enabled: Qt.platform.os === "windows" && !settingsScreen._lockHue
                             opacity: enabled ? 1.0 : 0.4
 
                             Column {
@@ -2956,7 +3057,9 @@ FocusScope {
                                     color: settingsScreen._text
                                 }
                                 Label {
-                                    text: qsTr("Auto-launches Hue Sync at stream start and closes it at end")
+                                    text: Qt.platform.os === "windows"
+                                          ? qsTr("Auto-launches Hue Sync at stream start and closes it at end")
+                                          : qsTr("The Philips Hue Sync desktop integration is available only on Windows.")
                                     font.family: Theme.family
                                     font.pixelSize: settingsScreen._px(Theme.fontSmall)
                                     color: settingsScreen._textDim

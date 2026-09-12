@@ -6,7 +6,7 @@ QT += core quick network quickcontrols2 svg quickdialogs2
 CONFIG += c++17
 
 unix:!macx {
-    TARGET = moonlight
+    TARGET = streamlight
 } else {
     # On macOS, this is the name displayed in the global menu bar
     TARGET = StreamLight
@@ -162,6 +162,7 @@ macx {
 }
 
 SOURCES += \
+    settings/menusettings.cpp \
     backend/nvaddress.cpp \
     backend/coverpalette.cpp \
     backend/linkspeed.cpp \
@@ -224,6 +225,7 @@ SOURCES += \
     wm.cpp
 
 HEADERS += \
+    settings/menusettings.h \
     SDL_compat.h \
     backend/nvaddress.h \
     backend/coverpalette.h \
@@ -536,13 +538,13 @@ unix:!macx: {
 
     target.path = $$PREFIX/$$BINDIR/
 
-    desktop.files = deploy/linux/com.moonlight_stream.Moonlight.desktop
+    desktop.files = deploy/linux/io.github.FoggyBytes.StreamLight.desktop
     desktop.path = $$PREFIX/$$DATADIR/applications/
 
-    icons.files = res/moonlight.svg
-    icons.path = $$PREFIX/$$DATADIR/icons/hicolor/scalable/apps/
+    icons.files = deploy/linux/streamlight.png
+    icons.path = $$PREFIX/$$DATADIR/pixmaps/
 
-    appstream.files = deploy/linux/com.moonlight_stream.Moonlight.appdata.xml
+    appstream.files = deploy/linux/io.github.FoggyBytes.StreamLight.metainfo.xml
     appstream.path = $$PREFIX/$$DATADIR/metainfo/
 
     INSTALLS += target desktop icons appstream
@@ -559,12 +561,13 @@ win32 {
 }
 macx {
     # Create Info.plist in object dir with the correct version string
-    system(cp $$PWD/Info.plist $$OUT_PWD/Info.plist)
-    system(sed -i -e 's/VERSION/$$cat(version.txt)/g' $$OUT_PWD/Info.plist)
+    system(cp $$shell_quote($$PWD/Info.plist) $$shell_quote($$OUT_PWD/Info.plist))
+    system(sed -i -e 's/VERSION/$$cat(version.txt)/g' $$shell_quote($$OUT_PWD/Info.plist))
 
     QMAKE_INFO_PLIST = $$OUT_PWD/Info.plist
 
-    APP_BUNDLE_RESOURCES.files = moonlight.icns
+    isEmpty(STREAMLIGHT_ICON): STREAMLIGHT_ICON = $$PWD/moonlight.icns
+    APP_BUNDLE_RESOURCES.files = $$STREAMLIGHT_ICON
     APP_BUNDLE_RESOURCES.path = Contents/Resources
 
     APP_BUNDLE_PLIST.files = $$OUT_PWD/Info.plist

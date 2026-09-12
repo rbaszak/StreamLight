@@ -734,6 +734,8 @@ Popup {
                 // about what happens around the stream rather than to the picture.
                 SettingRow {
                     label: qsTr("Philips Hue")
+                    enabled: Qt.platform.os === "windows"
+                    detail: enabled ? "" : qsTr("Requires the Windows Hue Sync desktop app")
                     SegmentedSelector {
                         id: hueSel; labels: dlg._hueLabels
                         hiddenIndices: dlg._dupIndices(dlg._hueLabels, "hue", currentIndex)

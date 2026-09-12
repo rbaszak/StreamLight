@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   badge:
+    if: github.repository == 'FoggyBytes/StreamLight'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

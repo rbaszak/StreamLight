@@ -1,4 +1,6 @@
 import Theme 1.0
+import MenuSettings 1.0
+import "StartupHost.js" as StartupHost
 import QtQuick 2.12
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
@@ -54,6 +56,40 @@ FocusScope {
     // a dozen bindings into a delegate: the stage needs all of it at once and nothing else
     // needs any of it.
     property var currentHost: null
+
+    // One startup attempt only. Manual navigation, Back, and returning from a
+    // stream must never send the user back into the default host automatically.
+    property bool _startupPending: MenuSettings.defaultHost.length > 0
+    property int _startupTicks: 0
+    Connections {
+        target: MenuSettings
+        function onUserInteraction() { homeScreen._startupPending = false }
+    }
+    Timer {
+        interval: 150
+        repeat: true
+        running: homeScreen._startupPending
+        onTriggered: {
+            if (!homeScreen.visible || !appShell || appShell.currentPage !== 0 || ++homeScreen._startupTicks > 54) {
+                homeScreen._startupPending = false
+                return
+            }
+            var hosts = []
+            for (var i = 0; i < hostProbes.count; ++i) {
+                var probe = hostProbes.itemAt(i)
+                hosts.push(probe ? probe.record() : null)
+            }
+            var target = StartupHost.choose(hosts, MenuSettings.defaultHost)
+            if (target.index < 0) return
+            homeScreen.tabIndex = target.index
+            if (target.open) {
+                homeScreen._startupPending = false
+                var h = hosts[target.index]
+                appShell.showApps(h.index, computerModel, false,
+                                  h.name, h.address, h.gpuModel, h.isTailscaleClone)
+            }
+        }
+    }
 
     // (The trigger glyphs used to be resolved here. ActionHint does it now — vendor, size and
     // the keyboard alternative all in one place — so the strip just names the button.)
@@ -781,6 +817,7 @@ FocusScope {
     }
 
     Component.onCompleted: {
+        Qt.callLater(refreshCurrentHost)
         ComputerManager.computerAddCompleted.connect(addComplete)
 
         // ⚠️ Deferred by a tick rather than opened here: on the first launch after the
@@ -954,6 +991,7 @@ FocusScope {
             function record() {
                 return {
                     index:             index,
+                    hostId:            model.hostId,
                     name:              model.name,
                     online:            model.online,
                     paired:            model.paired,
@@ -1186,9 +1224,20 @@ FocusScope {
     onHostCountChanged: {
         if (tabIndex > hostCount) tabIndex = hostCount
         if (addTabSelected) currentHost = null
+        Qt.callLater(refreshCurrentHost)
     }
 
-    onTabIndexChanged: if (addTabSelected) currentHost = null
+    function refreshCurrentHost() {
+        // Delegate completion can run before the Repeater updates count. Re-read
+        // once construction settles, including for an offline host with no updates.
+        var probe = hostProbes.itemAt(tabIndex)
+        currentHost = addTabSelected || !probe ? null : probe.record()
+    }
+
+    onTabIndexChanged: {
+        if (addTabSelected) currentHost = null
+        Qt.callLater(refreshCurrentHost)
+    }
 
     // ═════════════════════════════════════════════════════════════════════════
     // Navigation
@@ -1605,6 +1654,7 @@ FocusScope {
     // Everything the stage and the Options grid can ask for lands here. Keeping one switch
     // means the mouse, the D-pad and the face-button shortcuts cannot drift apart.
     function runAction(kind) {
+        _startupPending = false
         var h = currentHost
 
         switch (kind) {
@@ -1629,6 +1679,10 @@ FocusScope {
             }
             appShell.showApps(h.index, computerModel, false,
                               h.name, h.address, h.gpuModel, h.isTailscaleClone)
+            break
+
+        case "defaultHost":
+            MenuSettings.defaultHost = MenuSettings.defaultHost === h.hostId ? "" : h.hostId
             break
 
         case "continue":
@@ -1742,6 +1796,9 @@ FocusScope {
     // Tiles for the Options popup: { kind, icon (emoji) | iconSource, label, danger? }.
     function menuItemsFor(h) {
         var items = []
+        items.push({ kind: "defaultHost", icon: "★",
+                     label: MenuSettings.defaultHost === h.hostId
+                            ? qsTr("Clear default host") : qsTr("Set as default host") })
         if (h.online && h.paired)
             items.push({ kind: "viewAllApps", icon: "🎮", label: qsTr("All Apps") })
         // Tailscale: opens the host's apps over the 100.x endpoint. Greyed (non-clickable)
@@ -1749,7 +1806,8 @@ FocusScope {
         if (h.online && h.paired && h.hasTailscale)
             items.push({ kind: "tailscale", iconSource: "qrc:/res/tailscale.svg",
                          label: qsTr("Tailscale"), disabled: !_clientHasTailscale,
-                         reason: qsTr("not installed here") })
+                         reason: Qt.platform.os === "windows" ? qsTr("not installed here")
+                                 : qsTr("Start Tailscale separately and add the host's Tailscale IP manually") })
         if (!h.online && h.wakeable)
             items.push({ kind: "wake", icon: "⏰", label: qsTr("Wake") })
         items.push({ kind: "testNetwork", icon: "📡", label: qsTr("Test Network") })
@@ -1778,7 +1836,8 @@ FocusScope {
             // once the stream is done — so grey that one and the tile would be lying the other
             // way. Last in the chain because "matching is off" is the actionable reason when
             // both are true, while this one clears itself.
-            var why = h.linkChanging          ? qsTr("changing")
+            var why = (!restoring && Qt.platform.os !== "windows") ? qsTr("Requires a Windows client")
+                    : h.linkChanging          ? qsTr("changing")
                     : !h.allowsLinkControl    ? qsTr("host declined")
                     : (!restoring && !h.matchLink) ? qsTr("matching is off")
                     : (!restoring && h.sessionActive) ? qsTr("host busy")

@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import MenuSettings 1.0
 import SdlGamepadKeyNavigation 1.0
 
 /*
@@ -51,6 +52,7 @@ Item {
                                   && SdlGamepadKeyNavigation.inputMode !== "key"
 
     readonly property bool active: armed && hh.hovered
+    onActiveChanged: if (active && target.visible) MenuSettings.navigate()
 
     /**
      * The other half of the same rule: the control has the focus AND the focus should be

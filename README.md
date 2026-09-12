@@ -1,3 +1,29 @@
+# StreamLight — experimental Linux and macOS fork
+
+This is an **unofficial fork** of [FoggyBytes/StreamLight](https://github.com/FoggyBytes/StreamLight), based on [Moonlight-Qt](https://github.com/moonlight-stream/moonlight-qt).
+
+**The Linux port and the additional cross-platform work in this fork are being developed using GPT Codex. This fork is not fully tested.** Successful compilation and automated smoke tests do not establish that streaming, hardware decoding, HDR, audio or controllers work on every machine. Please report your OS, GPU, package version and logs with issues. This fork is not endorsed by FoggyBytes or the Moonlight project.
+
+## Packages and testing
+
+The [Releases page](https://github.com/rbaszak/StreamLight/releases) is the destination for experimental builds. A `v*` tag starts all platform jobs; publication happens only if every job succeeds. Branch builds are downloadable from Actions and are not releases.
+
+| System | Package | Notes |
+| --- | --- | --- |
+| CachyOS / Arch, x86-64 | `.pkg.tar.zst` | Native system dependencies; Wayland, X11 and DRM builds. Install/update with `sudo pacman -U ./streamlight-*.pkg.tar.zst`. Rolling distro updates can require a rebuild. |
+| Linux, x86-64 | `.AppImage` | Bundled runtime; X11/XWayland. Make executable and launch. Built on Ubuntu 22.04; needs FUSE 2 or `--appimage-extract-and-run`. |
+| Ubuntu / Mint, x86-64 | `.deb` | Native package management with runtime bundled under `/opt/streamlight`. Targets Ubuntu 22.04+ and Mint 21+; needs desktop X11/XWayland. Install/update with `sudo apt install ./streamlight_*_amd64.deb`. |
+| macOS 12+, Apple Silicon | `macos-arm64.dmg` | Open DMG and drag StreamLight to Applications. Experimental, ad-hoc signed, not notarized. |
+| macOS 12+, Intel | `macos-x86_64.dmg` | Same installation procedure; choose the architecture of your Mac. |
+| Windows 10/11, x64 | `-setup.exe`, `.zip` | Experimental installer or unpacked application. Not Authenticode signed. |
+
+Initial local testing covered the Arch package, GUI startup and menu behavior. **macOS, Windows and portable Linux packages require their first successful CI build and manual testing; configuration alone is not a verified release.** See [BUILDING.md](BUILDING.md) for build and release instructions and [LINUX.md](LINUX.md) for the Linux work and known limitations. Gatekeeper may require explicit approval in macOS System Settings → Privacy & Security for an unnotarized download; do not disable Gatekeeper globally.
+
+Additional fork features: choose a default host in its options menu to open its library on startup when online and paired; soft original menu sounds with mute and volume controls in Settings → Session. StreamTweak remains a **Windows-only host** application. Windows-specific client integrations are hidden on other platforms.
+
+AppImage build infrastructure is adapted from [drainerlight/StreamLight](https://github.com/drainerlight/StreamLight), commit `1342d5d4c1dddfbcea27a885ea35ec2f6420a8f1`. Original project authors retain their credits and licenses. The following is the original upstream README; upstream release and compatibility claims describe upstream, not verification of this fork.
+
+---
 ## 🎮 StreamLight
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue.svg)](https://github.com/FoggyBytes/StreamLight) [![Framework](https://img.shields.io/badge/Framework-Qt%206-brightgreen.svg)](https://www.qt.io/) [![Downloads](.badges/downloads.svg)](https://github.com/FoggyBytes/StreamLight/releases) [![Built on Moonlight](https://img.shields.io/badge/built%20on-Moonlight-blue?&logo=github)](https://github.com/moonlight-stream/moonlight-qt) [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-brightgreen.svg)](https://claude.ai/code)

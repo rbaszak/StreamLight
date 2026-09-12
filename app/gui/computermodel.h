@@ -34,7 +34,8 @@ class ComputerModel : public QAbstractListModel
         StageColorToRole,
         StageImageRole,
         StageSeedRole,
-        StreamTweakEnabledRole
+        StreamTweakEnabledRole,
+        HostIdRole
     };
 
 public:

@@ -1,0 +1,25 @@
+pkgname=streamlight
+pkgver=5.7.0
+pkgrel=5
+pkgdesc='StreamLight game streaming client - experimental Linux port'
+arch=('x86_64')
+url='https://github.com/rbaszak/StreamLight'
+license=('GPL-3.0-or-later')
+depends=('qt6-base' 'qt6-declarative' 'qt6-svg' 'qt6-wayland' 'sdl2-compat'
+         'sdl2_ttf' 'ffmpeg' 'opus' 'openssl' 'libva' 'libvdpau' 'libdrm'
+         'libplacebo' 'libx11' 'wayland' 'libegl')
+makedepends=('gcc' 'make' 'pkgconf' 'vulkan-headers')
+options=('!debug')
+
+build() {
+    mkdir -p "$srcdir/build"
+    cd "$srcdir/build"
+    qmake6 /src/moonlight-qt.pro PREFIX=/usr
+    make -j"${BUILD_JOBS:-4}" release
+}
+
+package() {
+    cd "$srcdir/build"
+    make INSTALL_ROOT="$pkgdir" install
+    install -Dm644 /src/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

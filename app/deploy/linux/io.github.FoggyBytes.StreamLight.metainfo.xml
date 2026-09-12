@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.FoggyBytes.StreamLight</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>StreamLight</name>
+  <summary>Stream games from a Sunshine-compatible host</summary>
+  <description><p>StreamLight is a Moonlight fork with a gamepad-oriented interface and optional StreamTweak host integration.</p></description>
+  <url type="homepage">https://github.com/FoggyBytes/StreamLight</url>
+  <launchable type="desktop-id">io.github.FoggyBytes.StreamLight.desktop</launchable>
+  <provides><binary>streamlight</binary></provides>
+  <content_rating type="oars-1.1"/>
+</component>

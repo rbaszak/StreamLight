@@ -1,4 +1,5 @@
 import Theme 1.0
+import MenuSettings 1.0
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Window 2.2
@@ -155,6 +156,11 @@ ApplicationWindow {
     minimumWidth: 1280
     minimumHeight: 720
     title: "StreamLight"
+    Binding {
+        target: MenuSettings
+        property: "active"
+        value: window.visible && window.active && stackView.depth === 1
+    }
     font.family: Theme.family
 
     // ── Embedded UI fonts (matches StreamTweak) ───────────────────────────────

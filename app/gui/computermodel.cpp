@@ -40,6 +40,8 @@ QVariant ComputerModel::data(const QModelIndex& index, int role) const
     QReadLocker lock(&computer->lock);
 
     switch (role) {
+    case HostIdRole:
+        return computer->uuid + QStringLiteral("/") + computer->aliasSuffix;
     case NameRole:
         return computer->name;
     case OnlineRole:
@@ -163,6 +165,7 @@ QHash<int, QByteArray> ComputerModel::roleNames() const
     QHash<int, QByteArray> names;
 
     names[NameRole] = "name";
+    names[HostIdRole] = "hostId";
     names[OnlineRole] = "online";
     names[PairedRole] = "paired";
     names[BusyRole] = "busy";

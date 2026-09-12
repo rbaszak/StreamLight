@@ -3,6 +3,7 @@
         <file>gui/main.qml</file>
         <file>gui/AppShell.qml</file>
         <file>gui/HomeScreen.qml</file>
+        <file>gui/StartupHost.js</file>
         <file>gui/HostStage.qml</file>
         <file>gui/StatusCluster.qml</file>
         <file>gui/DitheredGradient.qml</file>

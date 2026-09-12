@@ -1048,8 +1048,9 @@ Popup {
                 // level, so a per-game copy could hold a value it had no way to satisfy.
                 SettingRow {
                     label: qsTr("Fractional V-Sync")
-                    enabled: dlg._effPacing
-                    detail: enabled ? ""
+                    enabled: Qt.platform.os === "windows" && dlg._effPacing
+                    detail: Qt.platform.os !== "windows" ? qsTr("Requires Windows and the D3D11 renderer")
+                          : enabled ? ""
                           : (dlg._effVsync ? qsTr("Needs Frame pacing") : qsTr("Needs V-Sync"))
                     SegmentedSelector {
                         id: fracVsyncSel; labels: dlg._fracVsyncLabels
@@ -1074,6 +1075,8 @@ Popup {
                 // resolutions. Global = follow the setting in Settings → Network.
                 SettingRow {
                     label: qsTr("Match host link speed")
+                    enabled: Qt.platform.os === "windows"
+                    detail: enabled ? "" : qsTr("Requires a Windows client")
                     SegmentedSelector {
                         id: linkSel; labels: dlg._linkLabels
                         hiddenIndices: dlg._dupIndices(dlg._linkLabels, "matchlink", currentIndex)
@@ -1102,6 +1105,8 @@ Popup {
                 // live in Settings → Session.
                 SettingRow {
                     label: qsTr("Philips Hue")
+                    enabled: Qt.platform.os === "windows"
+                    detail: enabled ? "" : qsTr("Requires the Windows Hue Sync desktop app")
                     SegmentedSelector {
                         id: hueSel; labels: dlg._hueLabels
                         hiddenIndices: dlg._dupIndices(dlg._hueLabels, "hue", currentIndex)

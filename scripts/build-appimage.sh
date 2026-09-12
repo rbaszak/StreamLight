@@ -1,68 +1,34 @@
-BUILD_CONFIG="release"
-
-fail()
-{
-	echo "$1" 1>&2
-	exit 1
-}
-
-BUILD_ROOT=$PWD/build
-SOURCE_ROOT=$PWD
-BUILD_FOLDER=$BUILD_ROOT/build-$BUILD_CONFIG
-DEPLOY_FOLDER=$BUILD_ROOT/deploy-$BUILD_CONFIG
-INSTALLER_FOLDER=$BUILD_ROOT/installer-$BUILD_CONFIG
-
-if [ -n "$CI_VERSION" ]; then
-  VERSION=$CI_VERSION
-else
-  VERSION=`cat $SOURCE_ROOT/app/version.txt`
+#!/usr/bin/env bash
+set -euo pipefail
+source_root=$(cd "$(dirname "$0")/.." && pwd)
+version=${CI_VERSION:-$(tr -cd '0-9.' < "$source_root/app/version.txt")}
+[[ "$version" =~ ^[A-Za-z0-9._-]+$ ]] || exit 1
+build="$source_root/build/build-release"
+mkdir -p "$source_root/build"
+# Fresh staging avoids stale dependencies surviving subsequent builds.
+deploy=$(mktemp -d "$source_root/build/appdir.XXXXXX")
+output="$source_root/dist"
+mkdir -p "$build" "$output"
+cd "$build"
+# Portable builds use X11/XWayland, avoiding bundled Wayland libraries that can
+# conflict with newer host Mesa. Native Arch packages retain Wayland and DRM.
+qmake6 "$source_root/moonlight-qt.pro" CONFIG+=release CONFIG+=disable-wayland \
+  CONFIG+=disable-libdrm "PREFIX=$deploy/usr" DEFINES+=APP_IMAGE
+make -j"${BUILD_JOBS:-$(nproc)}" release
+make install
+extra=()
+sdl2=$(ldd "$deploy/usr/bin/streamlight" | awk '/libSDL2[^ ]* =>/ {print $3; exit}')
+if [ -n "$sdl2" ] && grep -aq 'libSDL3.so.0' "$sdl2"; then
+  sdl3=$(ldconfig -p | awk '/libSDL3.so.0 / {path=$NF} END {print path}')
+  test -n "$sdl3" && test -f "$sdl3"
+  mkdir -p "$deploy/usr/lib"
+  cp -L "$sdl3" "$deploy/usr/lib/libSDL3.so.0"
+  extra+=("-executable=$deploy/usr/lib/libSDL3.so.0")
 fi
-
-command -v qmake6 >/dev/null 2>&1 || fail "Unable to find 'qmake6' in your PATH!"
-command -v linuxdeployqt >/dev/null 2>&1 || fail "Unable to find 'linuxdeployqt' in your PATH!"
-
-echo Cleaning output directories
-rm -rf $BUILD_FOLDER
-rm -rf $DEPLOY_FOLDER
-rm -rf $INSTALLER_FOLDER
-mkdir $BUILD_ROOT
-mkdir $BUILD_FOLDER
-mkdir $DEPLOY_FOLDER
-mkdir $INSTALLER_FOLDER
-
-echo Configuring the project
-pushd $BUILD_FOLDER
-# Building with Wayland support will cause linuxdeployqt to include libwayland-client.so in the AppImage.
-# Since we always use the host implementation of EGL, this can cause libEGL_mesa.so to fail to load due
-# to missing symbols from the host's version of libwayland-client.so that aren't present in the older
-# version of libwayland-client.so from our AppImage build environment. When this happens, EGL fails to
-# work even in X11. To avoid this, we will disable Wayland support for the AppImage.
-#
-# We disable DRM support because linuxdeployqt doesn't bundle the appropriate libraries for Qt EGLFS.
-qmake6 $SOURCE_ROOT/moonlight-qt.pro CONFIG+=disable-wayland CONFIG+=disable-libdrm PREFIX=$DEPLOY_FOLDER/usr DEFINES+=APP_IMAGE || fail "Qmake failed!"
-popd
-
-echo Compiling Moonlight in $BUILD_CONFIG configuration
-pushd $BUILD_FOLDER
-make -j$(nproc) $(echo "$BUILD_CONFIG" | tr '[:upper:]' '[:lower:]') || fail "Make failed!"
-popd
-
-echo Deploying to staging directory
-pushd $BUILD_FOLDER
-make install || fail "Make install failed!"
-popd
-
-# We need to manually place SDL3 in our AppImage, since linuxdeployqt
-# cannot see the dependency via ldd when it looks at SDL2-compat.
-echo Staging SDL3 library
-mkdir -p $DEPLOY_FOLDER/usr/lib
-cp /usr/local/lib/libSDL3.so.0 $DEPLOY_FOLDER/usr/lib/
-
-echo Creating AppImage
-pushd $INSTALLER_FOLDER
-VERSION=$VERSION linuxdeployqt $DEPLOY_FOLDER/usr/share/applications/com.moonlight_stream.Moonlight.desktop \
-  -qmake=qmake6 -qmldir=$SOURCE_ROOT/app/gui -appimage -extra-plugins=tls \
-  -executable=$DEPLOY_FOLDER/usr/lib/libSDL3.so.0 || fail "linuxdeployqt failed!"
-popd
-
-echo Build successful
+cd "$output"
+export VERSION="$version" ARCH=x86_64
+linuxdeployqt "$deploy/usr/share/applications/io.github.FoggyBytes.StreamLight.desktop" \
+  -qmake=qmake6 "-qmldir=$source_root/app/gui" -appimage -extra-plugins=tls "${extra[@]}"
+# Keep the deployed AppDir for the native Debian package using identical libraries.
+printf '%s\n' "$deploy" > "$source_root/build/current-appdir.txt"
+test -f "$output/StreamLight-$version-x86_64.AppImage"
