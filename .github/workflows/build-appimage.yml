@@ -195,6 +195,12 @@ jobs:
           bash scripts/build-appimage.sh
           bash scripts/build-deb.sh
 
+      - name: Test packages on clean Ubuntu
+        run: |
+          for distro in 22.04 24.04; do
+            docker run --rm --mount type=bind,source="$PWD",target=/src,readonly --mount type=bind,source="$PWD/dist",target=/out,readonly "ubuntu:$distro" bash /src/tests/packaging/portable-smoke.sh
+          done
+
       - name: Upload Binaries
         uses: actions/upload-artifact@v6
         with:

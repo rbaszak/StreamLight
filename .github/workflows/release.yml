@@ -124,4 +124,9 @@ jobs:
         run: |
           cd release-assets
           sha256sum * > SHA256SUMS
-          gh release create "$RELEASE_TAG" --verify-tag --prerelease --title "StreamLight $RELEASE_TAG (experimental)" --notes-file ../packaging/RELEASE-NOTES.md ./*
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" --clobber ./*
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease --notes-file ../packaging/RELEASE-NOTES.md
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --prerelease --title "StreamLight $RELEASE_TAG (experimental)" --notes-file ../packaging/RELEASE-NOTES.md ./*
+          fi

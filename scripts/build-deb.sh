@@ -25,7 +25,7 @@ Section: games
 Priority: optional
 Architecture: amd64
 Maintainer: StreamLight fork contributors <noreply@github.com>
-Depends: libc6 (>= 2.35), libstdc++6, libgl1, libegl1, libx11-6, libxcb1, libxkbcommon0, libasound2, libdbus-1-3
+Depends: libc6 (>= 2.35), libstdc++6, libfontconfig1, libgl1, libegl1, libx11-6, libxcb1, libxkbcommon0, libasound2, libdbus-1-3
 Recommends: libvulkan1, mesa-va-drivers
 Homepage: https://github.com/rbaszak/StreamLight
 Installed-Size: $(du -sk "$stage/opt" | cut -f1)

@@ -17,13 +17,18 @@ qmake6 "$source_root/moonlight-qt.pro" CONFIG+=release CONFIG+=disable-wayland \
 make -j"${BUILD_JOBS:-$(nproc)}" release
 make install
 extra=()
-sdl2=$(ldd "$deploy/usr/bin/streamlight" | awk '/libSDL2[^ ]* =>/ {print $3; exit}')
-if [ -n "$sdl2" ] && grep -aq 'libSDL3.so.0' "$sdl2"; then
-  sdl3=$(ldconfig -p | awk '/libSDL3.so.0 / {path=$NF} END {print path}')
-  test -n "$sdl3" && test -f "$sdl3"
+sdl2=$(ldd "$deploy/usr/bin/streamlight" | awk '/libSDL2(-2[.]0)?[.]so[^ ]* =>/ {print $3; exit}')
+sdl3=$(ldconfig -p | awk '/libSDL3.so.0 / {path=$NF} END {print path}')
+# SDL2-compat loads SDL3 dynamically. Do not mistake SDL2_ttf for SDL2,
+# or rely on ldd to discover this dependency for linuxdeployqt.
+if [ -n "$sdl3" ]; then
+  test -f "$sdl3"
   mkdir -p "$deploy/usr/lib"
   cp -L "$sdl3" "$deploy/usr/lib/libSDL3.so.0"
   extra+=("-executable=$deploy/usr/lib/libSDL3.so.0")
+elif [ -n "$sdl2" ] && grep -aq 'libSDL3.so.0' "$sdl2"; then
+  echo 'SDL2-compat requires SDL3, but libSDL3.so.0 was not found' >&2
+  exit 1
 fi
 cd "$output"
 export VERSION="$version" ARCH=x86_64
