@@ -1,6 +1,6 @@
 # 🎮 StreamLight
 
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#-packaging-and-downloads) [![Framework](https://img.shields.io/badge/Framework-Qt%206-brightgreen.svg)](https://www.qt.io/) [![Downloads](https://img.shields.io/github/downloads/rbaszak/StreamLight/total)](https://github.com/rbaszak/StreamLight/releases) [![Built on Moonlight](https://img.shields.io/badge/built%20on-Moonlight-blue?&logo=github)](https://github.com/moonlight-stream/moonlight-qt) [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-brightgreen.svg)](https://claude.ai/code) [![Built with GPT Codex](https://img.shields.io/badge/Built%20with-GPT%20Codex-brightgreen.svg)](https://openai.com/codex/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#-packaging-and-downloads) [![Framework](https://img.shields.io/badge/Framework-Qt%206-brightgreen.svg)](https://www.qt.io/) [![Built on Moonlight](https://img.shields.io/badge/built%20on-Moonlight-blue?&logo=github)](https://github.com/moonlight-stream/moonlight-qt) [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-brightgreen.svg)](https://claude.ai/code) [![Built with GPT Codex](https://img.shields.io/badge/Built%20with-GPT%20Codex-brightgreen.svg)](https://openai.com/codex/)
 
 <div align="center">
   <img width="960" height="540" alt="StreamLight home screen with game artwork" src="https://github.com/user-attachments/assets/6f2aca2f-8df6-4ff3-847f-a71cb450fbc8" />
